@@ -5,9 +5,70 @@
 Escriba el codigo que ejecute la accion solicitada en cada pregunta.
 """
 
+"""
+Escriba el codigo que ejecute la accion solicitada en cada pregunta.
+"""
+
+import glob
+import os
+import zipfile
+
+import pandas as pd  # type: ignore
+
+
+def unzip_input(zip_path, extract_to):
+    """Descomprime el archivo zip en la carpeta indicada"""
+
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        zip_ref.extractall(extract_to)
+
+
+def load_dataset(input_directory):
+    """Recorre las subcarpetas negative/positive/neutral y arma un DataFrame"""
+
+    sentiments = ["negative", "positive", "neutral"]
+
+    records = []
+    for sentiment in sentiments:
+        files = glob.glob(f"{input_directory}/{sentiment}/*.txt")
+        for file in files:
+            with open(file, "rt", encoding="utf-8") as f:
+                phrase = f.read().strip()
+            records.append({"phrase": phrase, "target": sentiment})
+
+    dataframe = pd.DataFrame(records)
+    return dataframe
+
+
+def save_dataset(dataframe, output_file):
+    """Guarda el DataFrame en un archivo csv"""
+
+    if not os.path.exists("files/output"):
+        os.makedirs("files/output")
+
+    dataframe.to_csv(output_file, index=False)
+
 
 def pregunta_01():
     """
+    La información requerida para este laboratio esta almacenada en el
+    archivo "files/input.zip" ubicado en la carpeta raíz.
+    Descomprima este archivo.
+    ...
+    """
+
+    unzip_input("files/input.zip", "files")
+
+    train_dataframe = load_dataset("files/input/train")
+    test_dataframe = load_dataset("files/input/test")
+
+    save_dataset(train_dataframe, "files/output/train_dataset.csv")
+    save_dataset(test_dataframe, "files/output/test_dataset.csv")
+
+
+if __name__ == "__main__":
+    pregunta_01()
+"""
     La información requerida para este laboratio esta almacenada en el
     archivo "files/input.zip" ubicado en la carpeta raíz.
     Descomprima este archivo.
